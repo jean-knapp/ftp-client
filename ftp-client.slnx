@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../ModdingTool/ModernWinForms/ModernWinForms/ModernWinForms.csproj" Id="6c232cb9-5002-48b0-918a-15d05e4a7889" />
+  <Project Path="ftp-client/ftp-client.csproj" Id="6df901ab-1591-4148-b44d-0ef4afa59534" />
+</Solution>

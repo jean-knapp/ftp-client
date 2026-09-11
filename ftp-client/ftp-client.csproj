@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6DF901AB-1591-4148-B44D-0EF4AFA59534}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>FtpClient</RootNamespace>
+    <AssemblyName>FTP Client</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <LangVersion>latest</LangVersion>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentFTP">
+      <Version>54.2.1</Version>
+    </PackageReference>
+    <PackageReference Include="SSH.NET">
+      <Version>2026.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\ActionCard.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\BreadcrumbBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CardTabStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Chip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ChoiceControls.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CommandButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CommitFilesListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CommitListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Draw.cs" />
+    <Compile Include="Controls\DropTargetControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Icons.cs" />
+    <Compile Include="Controls\LogListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\NavRailControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\PaneResizeGrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\RemoteFileListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\RemoteTileControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\RemoteTreeControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\SavedSitesListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ScrollCornerControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\SegmentedControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\SessionTabStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\StatusBarControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\SurfacePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TextLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TokenCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ToggleSwitchControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TransferListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\VirtualListControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Deploy\DeployModels.cs" />
+    <Compile Include="Deploy\DeployPlanner.cs" />
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MessageDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MessageDialog.Designer.cs">
+      <DependentUpon>MessageDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\PairFolderDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PairFolderDialog.Designer.cs">
+      <DependentUpon>PairFolderDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\PermissionsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PermissionsDialog.Designer.cs">
+      <DependentUpon>PermissionsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ProtocolLogDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProtocolLogDialog.Designer.cs">
+      <DependentUpon>ProtocolLogDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SettingsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SettingsDialog.Designer.cs">
+      <DependentUpon>SettingsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SiteManagerDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SiteManagerDialog.Designer.cs">
+      <DependentUpon>SiteManagerDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SymlinkDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SymlinkDialog.Designer.cs">
+      <DependentUpon>SymlinkDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TextInputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TextInputDialog.Designer.cs">
+      <DependentUpon>TextInputDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TransferConflictDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TransferConflictDialog.Designer.cs">
+      <DependentUpon>TransferConflictDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Git\GitParsers.cs" />
+    <Compile Include="Git\GitRepository.cs" />
+    <Compile Include="Git\GitResult.cs" />
+    <Compile Include="Git\GitRunner.cs" />
+    <Compile Include="Git\Models.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Remote\CredentialStore.cs" />
+    <Compile Include="Remote\FtpSession.cs" />
+    <Compile Include="Remote\HostTrust.cs" />
+    <Compile Include="Remote\SftpSession.cs" />
+    <Compile Include="Remote\IRemoteSession.cs" />
+    <Compile Include="Remote\LocalFolderSession.cs" />
+    <Compile Include="Remote\RemoteEntry.cs" />
+    <Compile Include="Remote\RemoteSessionFactory.cs" />
+    <Compile Include="Remote\SessionLog.cs" />
+    <Compile Include="Remote\Site.cs" />
+    <Compile Include="Remote\SiteConnection.cs" />
+    <Compile Include="Remote\SiteStore.cs" />
+    <Compile Include="Services\AppSettings.cs" />
+    <Compile Include="Services\FolderPicker.cs" />
+    <Compile Include="Services\Format.cs" />
+    <Compile Include="Services\KnownFolders.cs" />
+    <Compile Include="Services\Theme.cs" />
+    <Compile Include="Transfers\ThrottledStream.cs" />
+    <Compile Include="Transfers\TransferItem.cs" />
+    <Compile Include="Transfers\TransferQueue.cs" />
+    <Compile Include="Views\ConnectView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\ConnectView.Designer.cs">
+      <DependentUpon>ConnectView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SiteView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\SiteView.Designer.cs">
+      <DependentUpon>SiteView.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ModdingTool\ModernWinForms\ModernWinForms\ModernWinForms.csproj">
+      <Project>{6c232cb9-5002-48b0-918a-15d05e4a7889}</Project>
+      <Name>ModernWinForms</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
