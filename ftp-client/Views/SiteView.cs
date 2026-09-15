@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -62,6 +62,12 @@ namespace FtpClient.Views
         private readonly Dictionary<string, Pairing> _deployPairings = new Dictionary<string, Pairing>(StringComparer.Ordinal);
         private readonly Dictionary<string, string> _staging = new Dictionary<string, string>(StringComparer.Ordinal);
 
+        // The paired repository is watched, so a commit made anywhere shows up here on its own.
+        private RepositoryWatcher _repositoryWatcher;
+        private readonly System.Windows.Forms.Timer _commitWatchTimer = new System.Windows.Forms.Timer { Interval = 400 };
+        private string _watchedGitDirectory;
+        private string _revisionSha;
+
         /// <summary>The connection state or the site's name changed.</summary>
         public event EventHandler StateChanged;
 
@@ -97,6 +103,7 @@ namespace FtpClient.Views
             contentTabs.SetEnabled(CommitsTab, false);
             ApplySplitColors();
             Theme.Changed += Theme_Changed;
+            _commitWatchTimer.Tick += commitWatchTimer_Tick;
         }
 
         private ModernSkin _splitSkin;
@@ -1279,6 +1286,7 @@ namespace FtpClient.Views
             contentTabs.SetEnabled(CommitsTab, paired);
             if (!paired)
             {
+                StopWatchingRepository();
                 contentTabs.SetBadge(CommitsTab, null);
                 if (contentTabs.SelectedIndex == CommitsTab) contentTabs.SelectedIndex = FilesTab;
             }
@@ -1324,6 +1332,7 @@ namespace FtpClient.Views
                 if (!dialog.Unpaired && dialog.Result != null) _site.Pairings.Add(dialog.Result);
             }
             SaveSite();
+            StopWatchingRepository();
             _commitsLoadedFor = null;
             _shownCommit = null;
             tree.Invalidate();
@@ -1344,7 +1353,11 @@ namespace FtpClient.Views
             if (commits) _ = LoadCommitsAsync(false);
         }
 
-        private async Task LoadCommitsAsync(bool force)
+        /// <summary>
+        /// Reads the paired repository's history. A quiet load is one the repository watcher asked for:
+        /// it keeps what is on screen until the new history is there, and says nothing when it fails.
+        /// </summary>
+        private async Task LoadCommitsAsync(bool force, bool quiet = false)
         {
             var pairing = CurrentPairing;
             if (pairing == null) return;
@@ -1358,8 +1371,11 @@ namespace FtpClient.Views
             _commitsCancellation?.Cancel();
             var cancellation = _commitsCancellation = new CancellationTokenSource();
             _planner = new DeployPlanner(pairing);
-            commitList.EmptyText = "Reading the history of " + Format.HomeRelative(pairing.LocalRoot) + "…";
-            commitList.Invalidate();
+            if (!quiet)
+            {
+                commitList.EmptyText = "Reading the history of " + Format.HomeRelative(pairing.LocalRoot) + "…";
+                commitList.Invalidate();
+            }
             try
             {
                 if (!Directory.Exists(pairing.LocalRoot)) throw new DirectoryNotFoundException(pairing.LocalRoot + " no longer exists.");
@@ -1369,11 +1385,14 @@ namespace FtpClient.Views
                 _branchName = branch;
                 _commits = commits;
                 _commitsLoadedFor = key;
+                _revisionSha = commits.Count > 0 ? commits[0].Commit.Sha : null;
                 commitList.EmptyText = "No commits on this branch yet.";
                 ApplyCommitStates();
-                ApplyCommitFilter(pairing.SelectedSha);
+                // A quiet load keeps the commit being read; a fresh one opens the remembered commit.
+                ApplyCommitFilter(quiet ? null : pairing.SelectedSha);
                 pairingChip.Branch = BranchLabel(pairing);
                 LayoutTabsBar();
+                _ = WatchRepositoryAsync(pairing);
             }
             catch (OperationCanceledException)
             {
@@ -1381,6 +1400,12 @@ namespace FtpClient.Views
             catch (Exception ex)
             {
                 if (cancellation.IsCancellationRequested) return;
+                if (quiet)
+                {
+                    // The repository moved out from under us; leave what is shown and stop watching.
+                    StopWatchingRepository();
+                    return;
+                }
                 _commits = new List<CommitEntry>();
                 _commitsLoadedFor = null;
                 commitList.EmptyText = "Could not read the repository: " + ex.Message;
@@ -1388,6 +1413,75 @@ namespace FtpClient.Views
                 ShowCommitAsync(null);
             }
             UpdateStatusBar();
+        }
+
+        // ------------------------------------------------------------------ watching the repository
+
+        /// <summary>
+        /// Watches the paired repository, so commits made in an editor, a terminal or another git
+        /// client reach the Commits tab without anyone pressing Refresh.
+        /// </summary>
+        private async Task WatchRepositoryAsync(Pairing pairing)
+        {
+            if (pairing == null || _planner == null) return;
+            string gitDirectory;
+            try
+            {
+                gitDirectory = await _planner.Repository.GetGitDirectoryAsync();
+            }
+            catch (Exception)
+            {
+                // Not a repository any more; the next load says so.
+                StopWatchingRepository();
+                return;
+            }
+            if (IsDisposed || !ReferenceEquals(CurrentPairing, pairing)) return;
+            if (_repositoryWatcher != null && string.Equals(_watchedGitDirectory, gitDirectory, StringComparison.OrdinalIgnoreCase)) return;
+
+            StopWatchingRepository();
+            var watcher = RepositoryWatcher.Start(gitDirectory, this);
+            if (watcher == null) return;
+            watcher.Changed += repositoryWatcher_Changed;
+            _repositoryWatcher = watcher;
+            _watchedGitDirectory = gitDirectory;
+        }
+
+        private void StopWatchingRepository()
+        {
+            _commitWatchTimer.Stop();
+            _watchedGitDirectory = null;
+            var watcher = _repositoryWatcher;
+            _repositoryWatcher = null;
+            if (watcher == null) return;
+            watcher.Changed -= repositoryWatcher_Changed;
+            watcher.Dispose();
+        }
+
+        // One git command writes several files; the timer waits for it to finish before reading.
+        private void repositoryWatcher_Changed(object sender, EventArgs e)
+        {
+            if (IsDisposed) return;
+            _commitWatchTimer.Stop();
+            _commitWatchTimer.Start();
+        }
+
+        private async void commitWatchTimer_Tick(object sender, EventArgs e)
+        {
+            _commitWatchTimer.Stop();
+            var pairing = CurrentPairing;
+            if (pairing == null || _planner == null || PairingKey(pairing) != _commitsLoadedFor) return;
+            string sha;
+            try
+            {
+                sha = await _planner.GetRevisionShaAsync(CancellationToken.None);
+            }
+            catch (Exception)
+            {
+                return;
+            }
+            // Staging, fetching and checking out touch the same files; only a moved branch is new history.
+            if (IsDisposed || sha == null || sha == _revisionSha || !ReferenceEquals(CurrentPairing, pairing)) return;
+            await LoadCommitsAsync(true, quiet: true);
         }
 
         private void ApplyCommitStates()
@@ -2287,6 +2381,8 @@ namespace FtpClient.Views
             {
                 Theme.Changed -= Theme_Changed;
                 _splitSkin?.Dispose();
+                StopWatchingRepository();
+                _commitWatchTimer.Dispose();
                 statusTimer.Stop();
                 queueTimer.Stop();
                 _listCancellation?.Cancel();

@@ -1,4 +1,4 @@
-namespace FtpClient.Controls
+﻿namespace FtpClient.Controls
 {
     /// <summary>
     /// SVG glyphs from the FTP Client handoff, on its 24 and 16 unit grids. Every glyph uses
@@ -54,6 +54,7 @@ namespace FtpClient.Controls
         public const string Forward = Open + "<path fill=\"currentColor\" d=\"M11 5l7 7-7 7v-4H5V9h6z\"/>" + Close;
         public const string Up = Open + "<path fill=\"currentColor\" d=\"M11 4h2v10.2l3.5-3.5 1.4 1.4L12 18l-5.9-5.9 1.4-1.4L11 14.2z\" transform=\"rotate(180 12 11)\"/>" + Close;
         public const string ChevronDown = Open12 + "<path fill=\"currentColor\" d=\"M1.5 4L6 8.5 10.5 4l-.9-.9L6 6.7 2.4 3.1z\"/>" + Close;
+        public const string ChevronLeft = Open12 + "<path fill=\"currentColor\" d=\"M8 1.5L3.5 6 8 10.5l.9-.9L5.3 6 8.9 2.4z\"/>" + Close;
         public const string ChevronRight = Open12 + "<path fill=\"currentColor\" d=\"M4 1.5L8.5 6 4 10.5l-.9-.9L6.7 6 3.1 2.4z\"/>" + Close;
         public const string ChevronUp = Open12 + "<path fill=\"currentColor\" d=\"M1.5 8L6 3.5 10.5 8l-.9.9L6 5.3 2.4 8.9z\"/>" + Close;
 

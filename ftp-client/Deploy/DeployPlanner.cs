@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -34,6 +34,13 @@ namespace FtpClient.Deploy
         public string Revision => string.IsNullOrWhiteSpace(Pairing.Branch) ? "HEAD" : Pairing.Branch.Trim();
 
         // ------------------------------------------------------------------ history
+
+        /// <summary>The sha the followed revision points at, or null when it has no commits yet.</summary>
+        public async Task<string> GetRevisionShaAsync(CancellationToken token)
+        {
+            var result = await RunAsync(token, null, "rev-parse", "--verify", "-q", Revision).ConfigureAwait(false);
+            return result.Succeeded ? result.StandardOutput.Trim() : null;
+        }
 
         public async Task<List<CommitEntry>> GetCommitsAsync(int maxCount, CancellationToken token)
         {
