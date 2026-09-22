@@ -1294,13 +1294,20 @@ namespace FtpClient.Views
             contentTabs.SetEnabled(CommitsTab, paired);
             if (!paired)
             {
-                StopWatchingRepository();
+                // Browsing outside the paired folder keeps the watcher: the history stays current
+                // for when the folder is opened again.
                 contentTabs.SetBadge(CommitsTab, null);
                 if (contentTabs.SelectedIndex == CommitsTab) contentTabs.SelectedIndex = FilesTab;
             }
             else if (PairingKey(pairing) != _commitsLoadedFor)
             {
                 _ = LoadCommitsAsync(false);
+            }
+            else
+            {
+                // Back in a folder whose history is loaded: commits may have landed meanwhile.
+                _ = WatchRepositoryAsync(pairing);
+                _ = CheckRevisionAsync();
             }
             LayoutTabsBar();
             UpdateStatusBar();
@@ -1373,6 +1380,8 @@ namespace FtpClient.Views
             if (!force && key == _commitsLoadedFor)
             {
                 ApplyCommitStates();
+                _ = WatchRepositoryAsync(pairing);
+                _ = CheckRevisionAsync();
                 return;
             }
 
@@ -1432,6 +1441,7 @@ namespace FtpClient.Views
         private async Task WatchRepositoryAsync(Pairing pairing)
         {
             if (pairing == null || _planner == null) return;
+            if (_repositoryWatcher != null && string.Equals(_watchedRoot, pairing.LocalRoot, StringComparison.OrdinalIgnoreCase)) return;
             string gitDirectory;
             try
             {
@@ -1452,12 +1462,14 @@ namespace FtpClient.Views
             watcher.Changed += repositoryWatcher_Changed;
             _repositoryWatcher = watcher;
             _watchedGitDirectory = gitDirectory;
+            _watchedRoot = pairing.LocalRoot;
         }
 
         private void StopWatchingRepository()
         {
             _commitWatchTimer.Stop();
             _watchedGitDirectory = null;
+            _watchedRoot = null;
             var watcher = _repositoryWatcher;
             _repositoryWatcher = null;
             if (watcher == null) return;
