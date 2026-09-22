@@ -1465,23 +1465,47 @@ namespace FtpClient.Views
             _commitWatchTimer.Start();
         }
 
-        private async void commitWatchTimer_Tick(object sender, EventArgs e)
+        private void commitWatchTimer_Tick(object sender, EventArgs e)
         {
             _commitWatchTimer.Stop();
+            _ = CheckRevisionAsync();
+        }
+
+        private void commitPollTimer_Tick(object sender, EventArgs e)
+        {
+            // Only the tab in front: the others check when they are shown again.
+            if (Visible) _ = CheckRevisionAsync();
+        }
+
+        /// <summary>
+        /// Reloads the history when the followed branch points somewhere new. One cheap rev-parse
+        /// otherwise, so the watcher, the poll and navigation can all ask for it.
+        /// </summary>
+        private async Task CheckRevisionAsync()
+        {
+            if (_checkingRevision || IsDisposed) return;
             var pairing = CurrentPairing;
             if (pairing == null || _planner == null || PairingKey(pairing) != _commitsLoadedFor) return;
-            string sha;
+            _checkingRevision = true;
             try
             {
-                sha = await _planner.GetRevisionShaAsync(CancellationToken.None);
+                string sha;
+                try
+                {
+                    sha = await _planner.GetRevisionShaAsync(CancellationToken.None);
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+                // Staging, fetching and checking out touch the same files; only a moved branch is new history.
+                if (IsDisposed || sha == null || sha == _revisionSha || !ReferenceEquals(CurrentPairing, pairing)) return;
+                await LoadCommitsAsync(true, quiet: true);
             }
-            catch (Exception)
+            finally
             {
-                return;
+                _checkingRevision = false;
             }
-            // Staging, fetching and checking out touch the same files; only a moved branch is new history.
-            if (IsDisposed || sha == null || sha == _revisionSha || !ReferenceEquals(CurrentPairing, pairing)) return;
-            await LoadCommitsAsync(true, quiet: true);
         }
 
         private void ApplyCommitStates()
