@@ -66,7 +66,13 @@ namespace FtpClient.Views
         private RepositoryWatcher _repositoryWatcher;
         private readonly System.Windows.Forms.Timer _commitWatchTimer = new System.Windows.Forms.Timer { Interval = 400 };
         private string _watchedGitDirectory;
+        private string _watchedRoot;
         private string _revisionSha;
+        private bool _checkingRevision;
+
+        // A safety net under the file watcher: some drives, antivirus filters and tools never raise
+        // its events, so the tip of the branch is also looked at every few seconds.
+        private readonly System.Windows.Forms.Timer _commitPollTimer = new System.Windows.Forms.Timer { Interval = 5000 };
 
         /// <summary>The connection state or the site's name changed.</summary>
         public event EventHandler StateChanged;
@@ -104,6 +110,8 @@ namespace FtpClient.Views
             ApplySplitColors();
             Theme.Changed += Theme_Changed;
             _commitWatchTimer.Tick += commitWatchTimer_Tick;
+            _commitPollTimer.Tick += commitPollTimer_Tick;
+            _commitPollTimer.Start();
         }
 
         private ModernSkin _splitSkin;
@@ -2407,6 +2415,8 @@ namespace FtpClient.Views
                 _splitSkin?.Dispose();
                 StopWatchingRepository();
                 _commitWatchTimer.Dispose();
+                _commitPollTimer.Stop();
+                _commitPollTimer.Dispose();
                 statusTimer.Stop();
                 queueTimer.Stop();
                 _listCancellation?.Cancel();
