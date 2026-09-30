@@ -53,13 +53,34 @@ namespace FtpClient.Forms
             tabReconnectItem.SvgIcon = Icons.Refresh;
             tabLogItem.SvgIcon = Icons.Terminal;
             ApplyTitleIcon();
+            ApplyTabStripTheme();
         }
 
         // ------------------------------------------------------------------ theme and icon
 
+        /// <summary>The library tab strip in this app's palette and type.</summary>
+        private void ApplyTabStripTheme()
+        {
+            var p = Theme.Palette;
+            var surface = p.Background;
+            sessionTabs.Font = Fonts.Ui(13f);
+            var c = sessionTabs.Colors;
+            c.BackColor = surface;
+            c.TabForeColor = p.Foreground2;
+            c.SelectedForeColor = p.Foreground;
+            c.SubtitleForeColor = p.Foreground3;
+            c.SelectedBackColor = p.FillOn(surface);
+            c.SelectedBorderColor = p.StrokeOn(surface);
+            c.HoverBackColor = p.HoverOn(surface);
+            c.ButtonHoverBackColor = p.Fill2On(surface);
+            c.GlyphColor = p.Foreground3;
+            c.AccentColor = p.Accent;
+        }
+
         private void OnThemeChanged(object sender, EventArgs e)
         {
             Theme.Apply(skin);
+            ApplyTabStripTheme();
             Invalidate(true);
         }
 
@@ -492,17 +513,17 @@ namespace FtpClient.Forms
 
         private void RefreshTabs()
         {
-            var tabs = _views.Select(v => new SessionTab
+            var tabs = _views.Select(v => new ModernTabStripItem
             {
-                Title = v.TabTitle,
-                Protocol = v.CurrentSite.Protocol == RemoteProtocol.Local ? "Local" : v.CurrentSite.ProtocolName,
-                State = v.TabState,
+                Text = v.TabTitle,
+                Subtitle = v.CurrentSite.Protocol == RemoteProtocol.Local ? "Local" : v.CurrentSite.ProtocolName,
+                StatusColor = v.TabState == SessionState.None ? Color.Empty : SessionStates.StateColor(v.TabState),
                 Tag = v,
             }).ToList();
-            if (_showingConnect) tabs.Add(new SessionTab { Title = "New connection", State = SessionState.None });
+            if (_showingConnect) tabs.Add(new ModernTabStripItem { Text = "New connection" });
             sessionTabs.Visible = _views.Count > 0;
             int selected = _activeView != null ? _views.IndexOf(_activeView) : tabs.Count - 1;
-            sessionTabs.SetTabs(tabs, selected);
+            sessionTabs.SetItems(tabs, selected);
         }
 
         private void Activate(SiteView view)
@@ -561,7 +582,23 @@ namespace FtpClient.Forms
             Activate(index >= 0 && index < _views.Count ? _views[index] : null);
         }
 
-        private void sessionTabs_TabCloseRequested(object sender, TabEventArgs e) => _ = CloseTabAsync(e.Index);
+        private void sessionTabs_TabCloseRequested(object sender, ModernTabStripEventArgs e) => _ = CloseTabAsync(e.Index);
+
+        /// <summary>
+        /// A tab was dragged to a new place: its session moves with it, and the order is saved for
+        /// next time. The new-connection tab always stays last.
+        /// </summary>
+        private void sessionTabs_TabMoved(object sender, ModernTabMovedEventArgs e)
+        {
+            if (e.FromIndex < _views.Count && e.ToIndex < _views.Count)
+            {
+                var view = _views[e.FromIndex];
+                _views.RemoveAt(e.FromIndex);
+                _views.Insert(e.ToIndex, view);
+                SaveOpenTabs();
+            }
+            RefreshTabs();
+        }
 
         private async Task CloseTabAsync(int index)
         {
@@ -611,7 +648,7 @@ namespace FtpClient.Forms
             }
         }
 
-        private void sessionTabs_TabContextMenuRequested(object sender, TabEventArgs e)
+        private void sessionTabs_TabContextMenuRequested(object sender, ModernTabStripEventArgs e)
         {
             if (e.Index < 0 || e.Index >= _views.Count) return;
             _tabMenuIndex = e.Index;
@@ -657,7 +694,7 @@ namespace FtpClient.Forms
             if (_tabMenuIndex >= 0 && _tabMenuIndex < _views.Count) RenameSite(_views[_tabMenuIndex]);
         }
 
-        private void sessionTabs_TabDoubleClick(object sender, TabEventArgs e)
+        private void sessionTabs_TabDoubleClick(object sender, ModernTabStripEventArgs e)
         {
             if (e.Index >= 0 && e.Index < _views.Count) RenameSite(_views[e.Index]);
         }

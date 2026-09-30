@@ -117,7 +117,7 @@ namespace FtpClient.Controls
             float centreY = Height / 2f;
             if (_state != SessionState.None)
             {
-                Draw.Dot(g, x, centreY, 7, SessionTabStrip.StateColor(_state));
+                Draw.Dot(g, x, centreY, 7, SessionStates.StateColor(_state));
                 x += 7 + 7;
             }
             x = Segment(g, x, rightEdge, null, _statusText, font, p.Foreground2, p.Foreground2);

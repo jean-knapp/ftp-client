@@ -31,7 +31,7 @@ namespace FtpClient.Forms
             this.tabLogItem = new ModernWinForms.ModernContextMenuItem();
             this.tabCloseItem = new ModernWinForms.ModernContextMenuItem();
             this.tabCloseOthersItem = new ModernWinForms.ModernContextMenuItem();
-            this.sessionTabs = new FtpClient.Controls.SessionTabStrip();
+            this.sessionTabs = new ModernWinForms.ModernTabStrip();
             this.hostPanel = new FtpClient.Controls.SurfacePanel();
             this.connectView = new FtpClient.Views.ConnectView();
             this.hostPanel.SuspendLayout();
@@ -118,10 +118,11 @@ namespace FtpClient.Forms
             this.sessionTabs.TabIndex = 0;
             this.sessionTabs.Visible = false;
             this.sessionTabs.SelectedIndexChanged += new System.EventHandler(this.sessionTabs_SelectedIndexChanged);
-            this.sessionTabs.TabCloseRequested += new System.EventHandler<FtpClient.Controls.TabEventArgs>(this.sessionTabs_TabCloseRequested);
-            this.sessionTabs.TabContextMenuRequested += new System.EventHandler<FtpClient.Controls.TabEventArgs>(this.sessionTabs_TabContextMenuRequested);
+            this.sessionTabs.TabCloseRequested += new System.EventHandler<ModernWinForms.ModernTabStripEventArgs>(this.sessionTabs_TabCloseRequested);
+            this.sessionTabs.TabContextMenuRequested += new System.EventHandler<ModernWinForms.ModernTabStripEventArgs>(this.sessionTabs_TabContextMenuRequested);
             this.sessionTabs.AddRequested += new System.EventHandler(this.sessionTabs_AddRequested);
-            this.sessionTabs.TabDoubleClick += new System.EventHandler<FtpClient.Controls.TabEventArgs>(this.sessionTabs_TabDoubleClick);
+            this.sessionTabs.TabMoved += new System.EventHandler<ModernWinForms.ModernTabMovedEventArgs>(this.sessionTabs_TabMoved);
+            this.sessionTabs.TabDoubleClick += new System.EventHandler<ModernWinForms.ModernTabStripEventArgs>(this.sessionTabs_TabDoubleClick);
             //
             // hostPanel
             //
@@ -179,7 +180,7 @@ namespace FtpClient.Forms
         private ModernWinForms.ModernContextMenuItem tabLogItem;
         private ModernWinForms.ModernContextMenuItem tabCloseItem;
         private ModernWinForms.ModernContextMenuItem tabCloseOthersItem;
-        private FtpClient.Controls.SessionTabStrip sessionTabs;
+        private ModernWinForms.ModernTabStrip sessionTabs;
         private FtpClient.Controls.SurfacePanel hostPanel;
         private FtpClient.Views.ConnectView connectView;
     }

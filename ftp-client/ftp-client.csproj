@@ -115,9 +115,7 @@
     <Compile Include="Controls\SegmentedControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\SessionTabStrip.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Controls\SessionState.cs" />
     <Compile Include="Controls\StatusBarControl.cs">
       <SubType>Component</SubType>
     </Compile>
